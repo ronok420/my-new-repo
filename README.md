@@ -1,145 +1,159 @@
-
-  # HireMe Backend API
+# HireMe Backend API
 
 A robust backend API for a job application platform that connects job seekers with employers, featuring role-based authentication, payment processing, and file upload capabilities.
 
 ## 🚀 Technologies Used
 
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **PostgreSQL** - Primary database (via Supabase)
-- **Supabase** - Database and authentication service
-- **JWT** - Authentication tokens
-- **Multer** - File upload handling
-- **Bcrypt** - Password hashing
-- **Stripe** - Payment processing (fake implementation)
+- **Node.js** – Runtime environment  
+- **Express.js** – Web framework  
+- **PostgreSQL** – Primary database (hosted on Supabase)  
+- **Supabase** – Hosted PostgreSQL service  
+- **JWT** – Authentication tokens  
+- **Multer** – File upload handling  
+- **Bcrypt** – Password hashing  
+- **Stripe** – Payment processing (mock for testing)  
+- **Zod** – Validation schemas  
+- **dotenv** – Environment variable management  
 
 ## 📁 Project Structure
-hire-me-backend/
+
+```
+hireme-backend/
 ├── src/
-│ ├── config/
-│ │ ├── database.js
-│ │ └── payment.js
-│ ├── controllers/
-│ │ ├── adminController.js
-│ │ ├── applicationController.js
-│ │ ├── jobController.js
-│ │ └── userController.js
-│ ├── middleware/
-│ │ ├── auth.js
-│ │ ├── upload.js
-│ │ └── validate.js
-│ ├── routes/
-│ │ ├── adminRoutes.js
-│ │ ├── applicationRoutes.js
-│ │ ├── jobRoutes.js
-│ │ └── userRoutes.js
-│ ├── validations/
-│ │ └── schemas.js
-│ └── app.js
+│   ├── config/
+│   │   ├── db.js                 # PostgreSQL client configuration
+│   │   ├── supabase.js           # Supabase client setup
+│   │   └── payment.js            # Stripe payment configuration
+│   ├── controllers/
+│   │   ├── authController.js     # Registration & login
+│   │   ├── adminController.js    # Admin-only operations
+│   │   ├── jobController.js      # Job CRUD operations
+│   │   ├── applicationController.js # Job application flows
+│   │   └── invoiceController.js  # Invoice/payment status
+│   ├── middlewares/
+│   │   ├── auth.js               # JWT authentication & role checks
+│   │   ├── upload.js             # Multer file upload handling
+│   │   └── validate.js           # Zod validation middleware
+│   ├── routes/
+│   │   ├── auth.js               # /api/auth endpoints
+│   │   ├── admin.js              # /api/admin endpoints
+│   │   ├── jobs.js               # /api/jobs endpoints
+│   │   ├── applications.js       # /api/applications endpoints
+│   │   └── invoices.js           # /api/invoices endpoints
+│   ├── schemas/
+│   │   ├── authSchemas.js        # Zod schemas for auth
+│   │   └── jobSchemas.js         # Zod schemas for jobs & applications
+│   ├── services/
+│   │   ├── userService.js        # Data access for users
+│   │   ├── jobService.js         # Data access for jobs
+│   │   └── applicationService.js # Data access for apps/invoices
+│   └── app.js                    # Express app initialization
 ├── uploads/
-│ └── resumes/
-├── .env
+│   └── resumes/                  # Uploaded CV/Resume files
+├── .env                          # Environment variables
 ├── .gitignore
 ├── package.json
-└── README.md
+└── server.js                     # Entry point: boots the Express app
+```
 
 ## 🛠️ Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/ronok420/hire-me-backend.git
-cd hire-me-backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env` file in the root directory with the following variables:   already  kept  for  testing purpose
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-JWT_SECRET=your_jwt_secret
-PORT=5000
-```
+1. **Clone** the repository:  
+   ```bash
+   git clone https://github.com/your-username/hireme-backend.git
+   cd hireme-backend
+   ```
+2. **Install** dependencies:  
+   ```bash
+   npm install
+   ```
+3. **Configure** environment variables by creating a `.env` file in the project root:
+   ```env
+   DATABASE_URL=postgresql://<user>:<pass>@<host>:5432/<db_name>
+   SUPABASE_URL=https://<project-ref>.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+   JWT_SECRET=<your_jwt_secret>
+   STRIPE_SECRET_KEY=<your_stripe_secret_key>
+   PORT=4000
+   ```
 
 ## 🚀 Running the Project
 
-1. Start the development server:
-```bash
-npm run dev
-```
+- **Development**:
+  ```bash
+  npm run dev
+  ```
+- **Production**:
+  ```bash
+  npm start
+  ```
 
-2. For production:
-```bash
-npm start
-```
+## 🔗 API Endpoints
 
-## 📝 API Documentation
+### Authentication
 
-### Authentication Endpoints
+| Method | Endpoint               | Description                    | Access  |
+| ------ | ---------------------- | ------------------------------ | ------- |
+| POST   | `/api/auth/register`   | Register as a **Job Seeker**   | Public  |
+| POST   | `/api/auth/login`      | Login and receive a JWT        | Public  |
 
-- `POST /api/users/register` - Register new user
-- `POST /api/users/login` - User login
-### Job Seeker Endpoints
+### Job Seeker
 
-- `GET /api/jobs` - View available jobs
-- `POST /api/applications/:job_id/:user_id/initiate` - Initiate job application
-- `POST /api/applications/:job_id/:user_id/payment` - Process payment
-- `POST /api/applications/:job_id/:user_id/confirm-payment` - Confirm payment
-- `GET /api/applications/user/applications` - View user's applications
+| Method | Endpoint                              | Description                       | Access        |
+| ------ | ------------------------------------- | --------------------------------- | ------------- |
+| GET    | `/api/jobs`                           | List all open job postings        | Authenticated |
+| POST   | `/api/applications/:job_id/apply`     | Upload CV & initiate application  | Job Seeker    |
 
-### Employee Endpoints
+### Employee (Recruiter)
 
-- `POST /api/jobs` - Create new job
-- `GET /api/applications/job/:job_id` - View job applications
-- `PUT /api/applications/:application_id/status` - Update application status
+| Method | Endpoint                                        | Description                          | Access    |
+| ------ | ----------------------------------------------- | ------------------------------------ | --------- |
+| POST   | `/api/jobs`                                     | Create a new job posting             | Employee  |
+| PUT    | `/api/jobs/:job_id`                             | Update own job posting               | Employee  |
+| DELETE | `/api/jobs/:job_id`                             | Delete own job posting               | Employee  |
+| GET    | `/api/applications/job/:job_id`                 | View applications for a job          | Employee  |
+| PUT    | `/api/applications/:application_id/status`      | Accept or reject an application      | Employee  |
 
-### Admin Endpoints
+### Admin
 
-- `GET /api/admin/applications` - View all applications
-- `GET /api/admin/jobs` - View all jobs
-- `GET /api/admin/analytics` - View company analytics
-- `PUT /api/admin/users/:id` - Update user
-- `DELETE /api/admin/users/:id` - Delete user
+| Method | Endpoint                         | Description                       | Access |
+| ------ | -------------------------------- | --------------------------------- | ------ |
+| GET    | `/api/admin/users`               | List all users                    | Admin  |
+| POST   | `/api/admin/users`               | Create Employee/Admin accounts    | Admin  |
+| PUT    | `/api/admin/users/:id`           | Update a user’s details           | Admin  |
+| DELETE | `/api/admin/users/:id`           | Delete a user                     | Admin  |
+| GET    | `/api/admin/jobs`                | List all jobs                     | Admin  |
+| GET    | `/api/admin/applications`        | List all applications             | Admin  |
+| GET    | `/api/admin/analytics`           | View platform analytics           | Admin  |
 
-## 🔐 Role-Based Access
+## 💾 Database Schema
 
-- **Admin**: Full access to all endpoints
-- **Employee**: Can create jobs and manage applications
-- **Job Seeker**: Can view jobs and submit applications
+Main tables (as per ERD):
+
+- `users`
+- `jobs`
+- `applications`
+- `invoices`
+
+All use ENUM types for roles and statuses to ensure data integrity.
 
 ## 💰 Payment System
 
-- Application fee: 100 Taka
-- Mock payment system for testing
-- Payment status tracking
-- Invoice generation
+- Application fee: **100 Taka**  
+- Stripe mock integration for testing  
+- Invoice tracking stored in the `invoices` table  
 
 ## 📄 File Upload
 
-- Supported formats: PDF, DOCX
-- Maximum size: 5MB
-- Stored in `uploads/resumes` directory
+- Supported formats: **PDF**, **DOCX**  
+- Max size: **5MB**  
+- Stored under `uploads/resumes/`
 
 ## 🔒 Security Features
 
-- JWT authentication
-- Role-based access control
-- Password hashing
-- File upload validation
-- CORS enabled
-
-## 📊 Database Schema
-
-The project uses Supabase with the following main tables:
-- users
-- jobs
-- applications
-- invoices
-
-
-
+- **JWT-based** authentication  
+- **Role-based** access control  
+- Password hashing with **Bcrypt**  
+- Request validation using **Zod**  
+- **CORS** enabled  
 
