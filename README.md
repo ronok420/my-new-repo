@@ -68,43 +68,100 @@ hireme-backend/
   npm start
   ```
 
-## 🔗 API Endpoints
+
+## 🔐 API Endpoints
 
 ### Authentication
+```http
+POST /api/users/register
+Body: {
+    "full_name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "role": "job_seeker"
+}
 
-| Method | Endpoint               | Description                    | Access  |
-| ------ | ---------------------- | ------------------------------ | ------- |
-| POST   | `/api/auth/register`   | Register as a **Job Seeker**   | Public  |
-| POST   | `/api/auth/login`      | Login and receive a JWT        | Public  |
+POST /api/users/login
+Body: {
+    "email": "john@example.com",
+    "password": "password123"
+}
+```
 
-### Job Seeker
+### Admin Endpoints
+```http
+GET /api/admin/applications
+GET /api/admin/jobs
+GET /api/admin/analytics
+PUT /api/admin/users/:id
+Body: {
+    "full_name": "Updated Name",
+    "email": "updated@example.com",
+    "role": "employee"
+}
+DELETE /api/admin/users/:id
+```
 
-| Method | Endpoint                              | Description                       | Access        |
-| ------ | ------------------------------------- | --------------------------------- | ------------- |
-| GET    | `/api/jobs`                           | List all open job postings        | Authenticated |
-| POST   | `/api/applications/:job_id/apply`     | Upload CV & initiate application  | Job Seeker    |
+### Job Endpoints
+```http
+GET /api/jobs
+GET /api/jobs/:id
+POST /api/jobs
+Body: {
+    "job_title": "Frontend Developer",
+    "job_description": "Job description here",
+    "company_name": "Tech Corp"
+}
+PUT /api/jobs/:id
+Body: {
+    "job_title": "Updated Title",
+    "job_description": "Updated description",
+    "company_name": "Updated Corp",
+    "job_status": "closed"
+}
+DELETE /api/jobs/:id
+GET /api/jobs/employee/jobs
+```
 
-### Employee (Recruiter)
+### Application Endpoints
+```http
+POST /api/applications/:job_id/:user_id/initiate
+Body: {
+    "resume": [file]
+}
 
-| Method | Endpoint                                        | Description                          | Access    |
-| ------ | ----------------------------------------------- | ------------------------------------ | --------- |
-| POST   | `/api/jobs`                                     | Create a new job posting             | Employee  |
-| PUT    | `/api/jobs/:job_id`                             | Update own job posting               | Employee  |
-| DELETE | `/api/jobs/:job_id`                             | Delete own job posting               | Employee  |
-| GET    | `/api/applications/job/:job_id`                 | View applications for a job          | Employee  |
-| PUT    | `/api/applications/:application_id/status`      | Accept or reject an application      | Employee  |
+POST /api/applications/:job_id/:user_id/payment
+Body: {
+    "payment_method": "card"
+}
 
-### Admin
+POST /api/applications/:job_id/:user_id/confirm-payment
+Body: {
+    "payment_intent_id": "pi_123456789"
+}
 
-| Method | Endpoint                         | Description                       | Access |
-| ------ | -------------------------------- | --------------------------------- | ------ |
-| GET    | `/api/admin/users`               | List all users                    | Admin  |
-| POST   | `/api/admin/users`               | Create Employee/Admin accounts    | Admin  |
-| PUT    | `/api/admin/users/:id`           | Update a user’s details           | Admin  |
-| DELETE | `/api/admin/users/:id`           | Delete a user                     | Admin  |
-| GET    | `/api/admin/jobs`                | List all jobs                     | Admin  |
-| GET    | `/api/admin/applications`        | List all applications             | Admin  |
-| GET    | `/api/admin/analytics`           | View platform analytics           | Admin  |
+GET /api/applications/job/:job_id
+PUT /api/applications/:application_id/status
+Body: {
+    "status": "approved"
+}
+GET /api/applications/user/applications
+GET /api/applications/:application_id
+```
+
+### User Management
+```http
+POST /api/users/create
+Body: {
+    "full_name": "New User",
+    "email": "new@example.com",
+    "password": "password123",
+    "role": "job_seeker"
+}
+GET /api/users/all
+```
+
+Note: All endpoints except login and register require Authorization header:
 
 ## 💾 Database Schema
 
