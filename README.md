@@ -90,6 +90,7 @@ Body: {
 
 ### Admin Endpoints
 ```http
+to view all applicants details
 GET /api/admin/applications
 GET /api/admin/jobs
 GET /api/admin/analytics
@@ -100,6 +101,35 @@ Body: {
     "role": "employee"
 }
 DELETE /api/admin/users/:id
+POST http://localhost:5000/api/users/create
+Authorization: Bearer admin_token
+Content-Type: application/json
+
+{
+    "full_name": "New User",
+    "email": "e4@gmail.com",
+    "password": "password123",
+    "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
+}
+PUT http://localhost:5000/api/admin/users/1
+Authorization: Bearer admin_token
+Content-Type: application/json
+
+{
+    "full_name": "Updated Name",
+    "email": "updated@example.com",
+    "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
+}
+Note: Replace 1 in the URL with the actual user_id,
+DELETE http://localhost:5000/api/admin/users/1
+Authorization: Bearer admin_token,
+admin filter company by analytics
+http://localhost:5000/api/admin/applications?status=accepted
+admin filter applicant  by status
+ http://localhost:5000/api/admin/applications?status=accepted   // or pending or reject
+admin filter company  by name
+http://localhost:5000/api/admin/analytics?company=Scale up adds
+
 ```
 
 ### Job Endpoints
