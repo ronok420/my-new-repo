@@ -92,6 +92,10 @@ Body: {
 
 #### User Management
 ```http
+# Get all users
+GET http://localhost:5000/api/users/all
+Authorization: Bearer admin_token
+
 # Create new user
 POST http://localhost:5000/api/users/create
 Authorization: Bearer admin_token
@@ -127,7 +131,24 @@ GET http://localhost:5000/api/admin/applications
 
 # Filter applications by status
 GET http://localhost:5000/api/admin/applications?status=accepted  // or pending or rejected
+
+# Filter applications by company and status
+GET http://localhost:5000/api/admin/applications?company=Scale up adds&status=accepted
 ```
+
+#### Jobs Management
+```http
+# Get all jobs
+GET http://localhost:5000/api/admin/jobs
+```
+
+#### Analytics
+```http
+# Get company analytics
+GET http://localhost:5000/api/admin/analytics?company=Scale up adds
+```
+
+Note: Replace `:id` in URLs with actual user_id
 
 #### Jobs Management
 ```http
