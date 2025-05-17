@@ -89,18 +89,10 @@ Body: {
 ```
 
 ### Admin Endpoints
+
+#### User Management
 ```http
-to view all applicants details
-GET /api/admin/applications
-GET /api/admin/jobs
-GET /api/admin/analytics
-PUT /api/admin/users/:id
-Body: {
-    "full_name": "Updated Name",
-    "email": "updated@example.com",
-    "role": "employee"
-}
-DELETE /api/admin/users/:id
+# Create new user
 POST http://localhost:5000/api/users/create
 Authorization: Bearer admin_token
 Content-Type: application/json
@@ -111,7 +103,9 @@ Content-Type: application/json
     "password": "password123",
     "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
 }
-PUT http://localhost:5000/api/admin/users/1
+
+# Update user
+PUT http://localhost:5000/api/admin/users/:id
 Authorization: Bearer admin_token
 Content-Type: application/json
 
@@ -120,17 +114,34 @@ Content-Type: application/json
     "email": "updated@example.com",
     "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
 }
-Note: Replace 1 in the URL with the actual user_id,
-DELETE http://localhost:5000/api/admin/users/1
-Authorization: Bearer admin_token,
-admin filter company by analytics
-http://localhost:5000/api/admin/applications?status=accepted
-admin filter applicant  by status
- http://localhost:5000/api/admin/applications?status=accepted   // or pending or reject
-admin filter company  by name
-http://localhost:5000/api/admin/analytics?company=Scale up adds
 
+# Delete user
+DELETE http://localhost:5000/api/admin/users/:id
+Authorization: Bearer admin_token
 ```
+
+#### Applications Management
+```http
+# Get all applications
+GET http://localhost:5000/api/admin/applications
+
+# Filter applications by status
+GET http://localhost:5000/api/admin/applications?status=accepted  // or pending or rejected
+```
+
+#### Jobs Management
+```http
+# Get all jobs
+GET http://localhost:5000/api/admin/jobs
+```
+
+#### Analytics
+```http
+# Get company analytics
+GET http://localhost:5000/api/admin/analytics?company=Scale up adds
+```
+
+Note: Replace `:id` in URLs with actual user_id
 
 ### Job Endpoints
 ```http
