@@ -21,39 +21,19 @@ A robust backend API for a job application platform that connects job seekers wi
 hireme-backend/
 ├── src/
 │   ├── config/
-│   │   ├── db.js                 # PostgreSQL client configuration
-│   │   ├── supabase.js           # Supabase client setup
-│   │   └── payment.js            # Stripe payment configuration
 │   ├── controllers/
-│   │   ├── authController.js     # Registration & login
-│   │   ├── adminController.js    # Admin-only operations
-│   │   ├── jobController.js      # Job CRUD operations
-│   │   ├── applicationController.js # Job application flows
-│   │   └── invoiceController.js  # Invoice/payment status
 │   ├── middlewares/
-│   │   ├── auth.js               # JWT authentication & role checks
-│   │   ├── upload.js             # Multer file upload handling
-│   │   └── validate.js           # Zod validation middleware
 │   ├── routes/
-│   │   ├── auth.js               # /api/auth endpoints
-│   │   ├── admin.js              # /api/admin endpoints
-│   │   ├── jobs.js               # /api/jobs endpoints
-│   │   ├── applications.js       # /api/applications endpoints
-│   │   └── invoices.js           # /api/invoices endpoints
 │   ├── schemas/
-│   │   ├── authSchemas.js        # Zod schemas for auth
-│   │   └── jobSchemas.js         # Zod schemas for jobs & applications
 │   ├── services/
-│   │   ├── userService.js        # Data access for users
-│   │   ├── jobService.js         # Data access for jobs
-│   │   └── applicationService.js # Data access for apps/invoices
-│   └── app.js                    # Express app initialization
+│   └── app.js
 ├── uploads/
-│   └── resumes/                  # Uploaded CV/Resume files
-├── .env                          # Environment variables
+│   └── resumes/
+├── .env
 ├── .gitignore
 ├── package.json
-└── server.js                     # Entry point: boots the Express app
+└── server.js
+
 ```
 
 ## 🛠️ Installation
