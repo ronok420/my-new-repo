@@ -67,25 +67,120 @@ hireme-backend/
   ```bash
   npm start
   ```
-
-
 ## 🔐 API Endpoints
 
 ### Authentication
 ```http
-POST /api/users/register
-Body: {
+# Register new user
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
     "full_name": "John Doe",
     "email": "john@example.com",
     "password": "password123",
-    "role": "job_seeker"
+    "role": "job_seeker"  // Can be: "job_seeker", "employee", or "admin"
 }
 
-POST /api/users/login
-Body: {
+# Login
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
     "email": "john@example.com",
     "password": "password123"
 }
+```
+
+### Job Seeker Endpoints
+```http
+# Get all available jobs
+GET http://localhost:5000/api/jobs
+
+# Get specific job details
+GET http://localhost:5000/api/jobs/:id
+
+# Apply for a job (Step 1: Upload Resume)
+POST http://localhost:5000/api/applications/:job_id/:user_id/initiate
+Authorization: Bearer job_seeker_token
+Content-Type: multipart/form-data
+
+{
+    "resume": [file]
+}
+
+# Process payment (Step 2)
+POST http://localhost:5000/api/applications/:job_id/:user_id/payment
+Authorization: Bearer job_seeker_token
+Content-Type: application/json
+
+{
+    "payment_method": "card"
+}
+
+# Confirm payment (Step 3)
+POST http://localhost:5000/api/applications/:job_id/:user_id/confirm-payment
+Authorization: Bearer job_seeker_token
+Content-Type: application/json
+
+{
+    "payment_intent_id": "pi_123456789"
+}
+
+# View application details
+GET http://localhost:5000/api/applications/:application_id
+Authorization: Bearer job_seeker_token
+```
+
+### Employee Endpoints
+```http
+# Create new job
+POST http://localhost:5000/api/jobs
+Authorization: Bearer employee_token
+Content-Type: application/json
+
+{
+    "job_title": "Frontend Developer",
+    "job_description": "Job description here",
+    "company_name": "Tech Corp"
+}
+
+# Update job
+PUT http://localhost:5000/api/jobs/:id
+Authorization: Bearer employee_token
+Content-Type: application/json
+
+{
+    "job_title": "Updated Title",
+    "job_description": "Updated description",
+    "company_name": "Updated Corp",
+    "job_status": "closed"
+}
+
+# Delete job
+DELETE http://localhost:5000/api/jobs/:id
+Authorization: Bearer employee_token
+
+# Get jobs posted by employee
+GET http://localhost:5000/api/jobs/employee/jobs
+Authorization: Bearer employee_token
+
+# Get applications for a job
+GET http://localhost:5000/api/applications/job/:job_id
+Authorization: Bearer employee_token
+
+# Update application status
+PUT http://localhost:5000/api/applications/:application_id/status
+Authorization: Bearer employee_token
+Content-Type: application/json
+
+{
+    "status": "approved"  // Can be: "pending", "accepted", "rejected"
+}
+
+# Get all applications for posted jobs
+GET http://localhost:5000/api/applications/user/applications
+Authorization: Bearer employee_token
 ```
 
 ### Admin Endpoints
@@ -128,111 +223,67 @@ Authorization: Bearer admin_token
 ```http
 # Get all applications
 GET http://localhost:5000/api/admin/applications
+Authorization: Bearer admin_token
 
 # Filter applications by status
-GET http://localhost:5000/api/admin/applications?status=accepted  // or pending or rejected
+GET http://localhost:5000/api/admin/applications?status=accepted
+Authorization: Bearer admin_token
 
 # Filter applications by company and status
 GET http://localhost:5000/api/admin/applications?company=Scale up adds&status=accepted
-```
-
-#### Jobs Management
-```http
-# Get all jobs
-GET http://localhost:5000/api/admin/jobs
+Authorization: Bearer admin_token
 ```
 
 #### Analytics
 ```http
 # Get company analytics
 GET http://localhost:5000/api/admin/analytics?company=Scale up adds
+Authorization: Bearer admin_token
 ```
 
-Note: Replace `:id` in URLs with actual user_id
-
-#### Jobs Management
+### Shared Endpoints (Accessible by Admin and Employee)
 ```http
 # Get all jobs
-GET http://localhost:5000/api/admin/jobs
-```
+GET http://localhost:5000/api/jobs
 
-#### Analytics
-```http
-# Get company analytics
-GET http://localhost:5000/api/admin/analytics?company=Scale up adds
-```
+# Get job by ID
+GET http://localhost:5000/api/jobs/:id
 
-Note: Replace `:id` in URLs with actual user_id
+# Create new job
+POST http://localhost:5000/api/jobs
+Authorization: Bearer token
+Content-Type: application/json
 
-### Job Endpoints
-```http
-GET /api/jobs
-GET /api/jobs/:id
-POST /api/jobs
-Body: {
+{
     "job_title": "Frontend Developer",
     "job_description": "Job description here",
     "company_name": "Tech Corp"
 }
-PUT /api/jobs/:id
-Body: {
+
+# Update job
+PUT http://localhost:5000/api/jobs/:id
+Authorization: Bearer token
+Content-Type: application/json
+
+{
     "job_title": "Updated Title",
     "job_description": "Updated description",
     "company_name": "Updated Corp",
     "job_status": "closed"
 }
-DELETE /api/jobs/:id
-GET /api/jobs/employee/jobs
+
+# Delete job
+DELETE http://localhost:5000/api/jobs/:id
+Authorization: Bearer token
 ```
 
-### Application Endpoints
-```http
-POST /api/applications/:job_id/:user_id/initiate
-Body: {
-    "resume": [file]
-}
-
-POST /api/applications/:job_id/:user_id/payment
-Body: {
-    "payment_method": "card"
-}
-
-POST /api/applications/:job_id/:user_id/confirm-payment
-Body: {
-    "payment_intent_id": "pi_123456789"
-}
-
-GET /api/applications/job/:job_id
-PUT /api/applications/:application_id/status
-Body: {
-    "status": "approved"
-}
-GET /api/applications/user/applications
-GET /api/applications/:application_id
-```
-
-### User Management
-```http
-POST /api/users/create
-Body: {
-    "full_name": "New User",
-    "email": "new@example.com",
-    "password": "password123",
-    "role": "job_seeker"
-}
-GET /api/users/all
-```
-
-Note: All endpoints except login and register require Authorization header:
-
-## 💾 Database Schema
-
-Main tables (as per ERD):
-
-- `users`
-- `jobs`
-- `applications`
-- `invoices`
+Note: 
+- Replace `:id`, `:job_id`, `:user_id`, and `:application_id` with actual IDs
+- All endpoints except register and login require Authorization header
+- Application fee is 100 Taka
+- Resume must be uploaded as a file
+- Status values: "pending", "accepted", "rejected"
+- Job status values: "open", "closed"
 
 All use ENUM types for roles and statuses to ensure data integrity.
 
