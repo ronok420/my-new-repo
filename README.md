@@ -132,15 +132,261 @@ GET http://localhost:5000/api/applications/:application_id
 Authorization: Bearer job_seeker_token
 ```
 
-[Rest of the endpoints follow the same format...]
+### Employee Endpoints
+```http
+# Create new job [Employee, Admin]
+POST http://localhost:5000/api/jobs
+Authorization: Bearer employee_token
+Content-Type: application/json
 
-All use ENUM types for roles and statuses to ensure data integrity.
+{
+    "job_title": "Frontend Developer",
+    "job_description": "Job description here",
+    "company_name": "Tech Corp"
+}
 
-## 💰 Payment System
+# Update job [Employee, Admin]
+PUT http://localhost:5000/api/jobs/:id
+Authorization: Bearer employee_token
+Content-Type: application/json
 
-- Application fee: **100 Taka**  
-- Stripe mock integration for testing  
-- Invoice tracking stored in the `invoices` table  
+{
+    "job_title": "Updated Title",
+    "job_description": "Updated description",
+    "company_name": "Updated Corp",
+    "job_status": "closed"
+}
+
+# Delete job [Employee, Admin]
+DELETE http://localhost:5000/api/jobs/:id
+Authorization: Bearer employee_token
+
+# Get jobs posted by employee [Employee, Admin]
+GET http://localhost:5000/api/jobs/employee/jobs
+Authorization: Bearer employee_token
+
+# Get applications for a job [Employee]
+GET http://localhost:5000/api/applications/job/:job_id
+Authorization: Bearer employee_token
+
+# Update application status [Employee]
+PUT http://localhost:5000/api/applications/:application_id/status
+Authorization: Bearer employee_token
+Content-Type: application/json
+
+{
+    "status": "approved"  // Can be: "pending", "accepted", "rejected"
+}
+
+# Get all applications for posted jobs [Employee]
+GET http://localhost:5000/api/applications/user/applications
+Authorization: Bearer employee_token
+```
+
+### Admin Endpoints
+
+#### User Management
+```http
+# Get all users [Admin]
+GET http://localhost:5000/api/users/all
+Authorization: Bearer admin_token
+
+# Create new user [Admin]
+POST http://localhost:5000/api/users/create
+Authorization: Bearer admin_token
+Content-Type: application/json
+
+{
+    "full_name": "New User",
+    "email": "e4@gmail.com",
+    "password": "password123",
+    "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
+}
+
+# Update user [Admin]
+PUT http://localhost:5000/api/admin/users/:id
+Authorization: Bearer admin_token
+Content-Type: application/json
+
+{
+    "full_name": "Updated Name",
+    "email": "updated@example.com",
+    "role": "employee"  // Can be: "job_seeker", "employee", or "admin"
+}
+
+# Delete user [Admin]
+DELETE http://localhost:5000/api/admin/users/:id
+Authorization: Bearer admin_token
+```
+
+#### Applications Management
+```http
+# Get all applications [Admin]
+GET http://localhost:5000/api/admin/applications
+Authorization: Bearer admin_token
+
+# Filter applications by status [Admin]
+GET http://localhost:5000/api/admin/applications?status=accepted
+Authorization: Bearer admin_token
+
+# Filter applications by company and status [Admin]
+GET http://localhost:5000/api/admin/applications?company=Scale up adds&status=accepted
+Authorization: Bearer admin_token
+```
+
+#### Analytics
+```http
+# Get company analytics [Admin]
+GET http://localhost:5000/api/admin/analytics?company=Scale up adds
+Authorization: Bearer admin_token
+```
+
+### Shared Endpoints
+```http
+# Get all jobs [Public]
+GET http://localhost:5000/api/jobs
+
+# Get job by ID [Public]
+GET http://localhost:5000/api/jobs/:id
+
+# Create new job [Employee, Admin]
+POST http://localhost:5000/api/jobs
+Authorization: Bearer token
+Content-Type: application/json
+
+{
+    "job_title": "Frontend Developer",
+    "job_description": "Job description here",
+    "company_name": "Tech Corp"
+}
+
+# Update job [Employee, Admin]
+PUT http://localhost:5000/api/jobs/:id
+Authorization: Bearer token
+Content-Type: application/json
+
+{
+    "job_title": "Updated Title",
+    "job_description": "Updated description",
+    "company_name": "Updated Corp",
+    "job_status": "closed"
+}
+
+# Delete job [Employee, Admin]
+DELETE http://localhost:5000/api/jobs/:id
+Authorization: Bearer token
+```
+
+Note: 
+- Replace `:id`, `:job_id`, `:user_id`, and `:application_id` with actual IDs
+- All endpoints except register and login require Authorization header
+- Application fee is 100 Taka
+- Resume must be uploaded as a file
+- Status values: "pending", "accepted", "rejected"
+- Job status values: "open", "closed"
+
+## 👥 User Roles
+
+### Job Seeker
+- Can view all available jobs
+- Can apply for jobs
+- Can upload resume
+- Can make payment for applications
+- Can view their own applications
+
+### Employee
+- Can post new jobs
+- Can update their posted jobs
+- Can delete their posted jobs
+- Can view applications for their jobs
+- Can update application status
+- Can view analytics for their posted jobs
+
+### Admin
+- Can perform all employee actions
+- Can manage all users (create, update, delete)
+- Can view all applications
+- Can filter applications by status and company
+- Can view company analytics
+- Can manage all jobs
+
+## 💰 Payment Flow
+
+### Application Fee
+- Fixed fee: 100 Taka per application
+- Required for each job application
+- Non-refundable
+
+### Payment Process
+1. **Initiate Application**
+```http
+POST http://localhost:5000/api/applications/:job_id/:user_id/initiate
+Authorization: Bearer job_seeker_token
+Content-Type: multipart/form-data
+
+{
+    "resume": [file]
+}
+```
+- Uploads resume
+- Creates pending application
+- Application status: "pending_payment"
+
+2. **Process Payment**
+```http
+POST http://localhost:5000/api/applications/:job_id/:user_id/payment
+Authorization: Bearer job_seeker_token
+Content-Type: application/json
+
+{
+    "payment_method": "card"
+}
+```
+- Creates payment intent
+- Returns client secret for payment
+- Application status: "pending_payment"
+
+3. **Confirm Payment**
+```http
+POST http://localhost:5000/api/applications/:job_id/:user_id/confirm-payment
+Authorization: Bearer job_seeker_token
+Content-Type: application/json
+
+{
+    "payment_intent_id": "pi_123456789"
+}
+```
+- Confirms payment
+- Updates application status to "pending"
+- Creates invoice record
+- Application status: "pending"
+
+### Payment Status Flow
+1. pending_payment → Initial state after resume upload
+2. pending → After successful payment
+3. accepted → After employee/admin approval
+4. rejected → After employee/admin rejection
+
+### Invoice Generation
+- Generated automatically after successful payment
+- Contains:
+  - Application ID
+  - Amount (100 Taka)
+  - Payment status
+  - Payment intent ID
+  - Timestamp
+
+### Payment Security
+- Uses mock payment system for development
+- No real money transactions
+- Payment status is automatically approved
+- For production: Integrate with real payment gateway
+
+### Error Handling
+- Payment failed: Application remains in "pending_payment" state
+- Invalid payment: Returns error message
+- Duplicate payment: Prevents double charging
+- Network issues: Retry mechanism available
 
 ## 📄 File Upload
 
